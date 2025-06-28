@@ -1,0 +1,7 @@
+tasks.register('updateGitHooks', Copy) {
+    from '../scripts/prepare-commit-msg'
+    into '../.git/hooks'
+    fileMode 0775
+}
+
+// compileJava.dependsOn updateGitHooks
