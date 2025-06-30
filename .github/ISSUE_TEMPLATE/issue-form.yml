@@ -1,0 +1,23 @@
+# --- 템플릿 기본 설정 ---
+name: '기능 추가 이슈 생성'
+description: '기능 추가 이슈를 생성하면 Jira와 연동되어 task를 생성하고 Jira 티켓 넘버에 해당하는 브랜치를 생성해줍니다.'
+title: 'feat : 이슈 제목'
+labels: [feat]
+
+# --- 입력 폼 본문 ---
+body:
+  - type: input
+    id: description
+    attributes:
+      label: '📝 이슈 상세 내용'
+      description: '이슈에 대해 설명해주세요'
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: '✅ 이슈 체크리스트'
+      description: '해당 이슈에 필요한 작업 목록을 작성해주세요'
+      value: |
+        - [ ] 작업1
