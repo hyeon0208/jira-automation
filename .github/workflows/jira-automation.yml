@@ -6,7 +6,7 @@ on:
 
 jobs:
   create-jira-and-branch:
-    name: Jira 이슈 생성 및 브랜치 생성
+    name: Jira Task 생성 및 브랜치 생성
     runs-on: ubuntu-latest
     steps:
       - name: main 브랜치 코드 체크아웃
@@ -26,8 +26,8 @@ jobs:
           mode: md2jira
 
       # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-archive-put
-      - name: Jira 이슈 생성
-        id: create_jira_issue
+      - name: Jira Task 생성
+        id: create_jira_task
         uses: fjogeleit/http-request-action@v1
         with:
           url: '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue'
@@ -51,7 +51,7 @@ jobs:
       - name: Jira 이슈 키 추출
         id: extract_issue_key
         run: |
-          issue_key=$(echo '${{ steps.create_jira_issue.outputs.response }}' | jq -r '.key')
+          issue_key=$(echo '${{ steps.create_jira_task.outputs.response }}' | jq -r '.key')
           echo "issue_key=$issue_key" >> $GITHUB_OUTPUT
           echo "Created Jira issue: $issue_key"
 
@@ -73,9 +73,19 @@ jobs:
           title: "${{ steps.extract_issue_key.outputs.issue_key }} ${{ github.event.issue.title }}"
 
       - name: 담당자 할당
-        uses: actions-cool/issues-helper@v3
+        uses: actions-cool/issues-helper@v3 # ref : https://github.com/actions-cool/issues-helper
         with:
           actions: 'add-assignees'
           token: ${{ secrets.GIT_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           assignees: ${{ github.event.issue.user.login }}
+
+      - name: 브랜치 생성 및 Jira 링크 댓글 추가
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GIT_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |            
+            🪾 **생성된 브랜치**: `feat/${{ steps.extract_issue_key.outputs.issue_key }}`
+            🔗 **연결된 Jira Task**: ${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_issue_key.outputs.issue_key }}
