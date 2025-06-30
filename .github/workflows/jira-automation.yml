@@ -25,6 +25,7 @@ jobs:
             ${{ github.event.issue.body }}
           mode: md2jira
 
+      # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-archive-put
       - name: Jira 이슈 생성
         id: create_jira_issue
         uses: fjogeleit/http-request-action@v1
@@ -43,31 +44,7 @@ jobs:
                 "issuetype": {
                   "name": "Task"
                 },
-                "summary": "${{ github.event.issue.title }}",
-                "description": {
-                  "type": "doc",
-                  "version": 1,
-                  "content": [
-                    {
-                      "type": "paragraph",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "GitHub Issue: ${{ github.event.issue.html_url }}"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "paragraph",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "${{ steps.md2jira.outputs.output-text }}"
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "summary": "${{ github.event.issue.title }}"
               }
             }
 
