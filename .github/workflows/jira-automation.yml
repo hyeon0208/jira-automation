@@ -25,22 +25,6 @@ jobs:
             ${{ github.event.issue.body }}
           mode: md2jira
 
-#      - name: GitHub 사용자 이메일로 Jira 계정 ID 조회
-#        id: get_jira_user
-#        uses: fjogeleit/http-request-action@v1 # ref : https://github.com/marketplace/actions/http-request-action
-#        with:
-#          url: '${{ secrets.JIRA_BASE_URL }}/rest/api/3/user/search?query=${{ github.event.issue.user.login }}'
-#          method: 'GET'
-#          username: '${{ secrets.JIRA_USER_EMAIL }}'
-#          password: '${{ secrets.JIRA_API_TOKEN }}'
-#          customHeaders: '{"Content-Type": "application/json"}'
-
-      - name: Jira 사용자 ID 설정
-        id: extract_user_id
-        run: |
-          echo "user_id=${{ secrets.JIRA_DEFAULT_ASSIGNEE_ID }}" >> $GITHUB_OUTPUT
-          echo "Using default Jira assignee ID"
-
       - name: Jira 이슈 생성
         id: create_jira_issue
         uses: fjogeleit/http-request-action@v1
@@ -60,9 +44,6 @@ jobs:
                   "name": "Task"
                 },
                 "summary": "${{ github.event.issue.title }}",
-                "assignee": {
-                   "id": "${{ steps.extract_user_id.outputs.user_id }}" 
-                },
                 "description": {
                   "type": "doc",
                   "version": 1,
