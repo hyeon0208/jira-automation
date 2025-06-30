@@ -53,7 +53,16 @@ jobs:
                       "content": [
                         {
                           "type": "text",
-                          "text": "GitHub Issue: ${{ github.event.issue.html_url }}\n\n${{ steps.md2jira.outputs.output-text }}"
+                          "text": "GitHub Issue: ${{ github.event.issue.html_url }}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "${{ steps.md2jira.outputs.output-text }}"
                         }
                       ]
                     }
