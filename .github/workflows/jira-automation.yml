@@ -1,0 +1,108 @@
+name: GitHub 이슈 → Jira 이슈 생성 및 브랜치 자동화
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  create-jira-and-branch:
+    name: Jira 이슈 생성 및 브랜치 생성
+    runs-on: ubuntu-latest
+    steps:
+      - name: main 브랜치 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Github 이슈 마크다운을 Jira 마크다운 문법으로 변환
+        uses: peter-evans/jira2md@v1 # ref : https://github.com/peter-evans/jira2md
+        id: md2jira
+        with:
+          input-text: |
+            ### Github Issue Link
+            - ${{ github.event.issue.html_url }}
+
+            ${{ github.event.issue.body }}
+          mode: md2jira
+
+      - name: GitHub 사용자 이메일로 Jira 계정 ID 조회
+        id: get_jira_user
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: '${{ secrets.JIRA_BASE_URL }}/rest/api/3/user/search?query=${{ github.event.issue.user.login }}'
+          method: 'GET'
+          username: '${{ secrets.JIRA_USER_EMAIL }}'
+          password: '${{ secrets.JIRA_API_TOKEN }}'
+          customHeaders: '{"Content-Type": "application/json"}'
+
+      - name: Jira 이슈 생성
+        id: create_jira_issue
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue'
+          method: 'POST'
+          username: '${{ secrets.JIRA_USER_EMAIL }}'
+          password: '${{ secrets.JIRA_API_TOKEN }}'
+          customHeaders: '{"Content-Type": "application/json"}'
+          data: |
+            {
+              "fields": {
+                "project": {
+                  "key": "${{ secrets.JIRA_PROJECT_KEY }}"
+                },
+                "issuetype": {
+                  "name": "Task"
+                },
+                "summary": "${{ github.event.issue.title }}",
+                "assignee": {
+                   "id": "${{ steps.extract_user_id.outputs.user_id }}"
+                },
+                "description": {
+                  "type": "doc",
+                  "version": 1,
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "${{ steps.md2jira.outputs.output-text }}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+
+      - name: Jira 이슈 키 추출
+        id: extract_issue_key
+        run: |
+          issue_key=$(echo '${{ steps.create_jira_issue.outputs.response }}' | jq -r '.key')
+          echo "issue_key=$issue_key" >> $GITHUB_OUTPUT
+          echo "Created Jira issue: $issue_key"
+
+      - name: dev 브랜치 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: dev 브랜치에 Jira 티켓 번호를 사용한 feat 브랜치 생성
+        run: |
+          git checkout -b feat/${{ steps.get_key.outputs.issue_key }}
+          git push origin feat/${{ steps.get_key.outputs.issue_key }}
+
+      - name: GitHub 이슈의 제목 앞에 새로 생성된 Jira 티켓 번호 추가
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "update-issue"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ steps.get_key.outputs.issue_key }} ${{ github.event.issue.title }}"
+
+      - name: 담당자 할당
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'add-assignees'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          assignees: ${{ github.event.issue.user.login }}
