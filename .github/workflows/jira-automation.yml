@@ -34,31 +34,17 @@ jobs:
           username: '${{ secrets.JIRA_USER_EMAIL }}'
           password: '${{ secrets.JIRA_API_TOKEN }}'
           customHeaders: '{"Content-Type": "application/json"}'
-          data: | # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-user-search#api-rest-api-3-user-search-get
+          data: |
             {
               "fields": {
                 "project": {
                   "key": "${{ secrets.JIRA_PROJECT_KEY }}"
                 },
                 "issuetype": {
-                  "name": "Task"
+                  "name": "해야 할 일"
                 },
                 "summary": "${{ github.event.issue.title }}",
-                "description": {
-                  "type": "doc",
-                  "version": 1,
-                  "content": [
-                    {
-                      "type": "paragraph",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "${{ steps.md2jira.outputs.output-text }}"
-                        }
-                      ]
-                    }
-                  ]
-                }
+                "description": "GitHub Issue: ${{ github.event.issue.html_url }}\n\n${{ steps.md2jira.outputs.output-text }}"
               }
             }
 
