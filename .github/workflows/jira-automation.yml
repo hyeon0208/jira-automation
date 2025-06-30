@@ -27,7 +27,7 @@ jobs:
 
       - name: GitHub 사용자 이메일로 Jira 계정 ID 조회
         id: get_jira_user
-        uses: fjogeleit/http-request-action@v1
+        uses: fjogeleit/http-request-action@v1 # ref : https://github.com/marketplace/actions/http-request-action
         with:
           url: '${{ secrets.JIRA_BASE_URL }}/rest/api/3/user/search?query=${{ github.event.issue.user.login }}'
           method: 'GET'
@@ -44,7 +44,7 @@ jobs:
           username: '${{ secrets.JIRA_USER_EMAIL }}'
           password: '${{ secrets.JIRA_API_TOKEN }}'
           customHeaders: '{"Content-Type": "application/json"}'
-          data: |
+          data: | # ref : https://github.com/marketplace/actions/http-request-action
             {
               "fields": {
                 "project": {
@@ -96,13 +96,13 @@ jobs:
         uses: actions-cool/issues-helper@v3
         with:
           actions: "update-issue"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
           title: "${{ steps.get_key.outputs.issue_key }} ${{ github.event.issue.title }}"
 
       - name: 담당자 할당
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'add-assignees'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           assignees: ${{ github.event.issue.user.login }}
