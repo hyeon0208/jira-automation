@@ -33,7 +33,7 @@ jobs:
           converted_title=$(echo "$title" | sed 's/\[\([^]]*\)\]/[BE\/\1]/')
           echo "converted_title=$converted_title" >> $GITHUB_OUTPUT
 
-      # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-archive-put
+      # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post
       - name: Jira Task 생성
         id: create_jira_task
         uses: fjogeleit/http-request-action@v1
@@ -52,9 +52,28 @@ jobs:
                 "issuetype": {
                   "name": "Task"
                 },
-                "summary": "${{ steps.convert_title.outputs.converted_title }}"
+                "assignee": {
+                  "emailAddress": "${{ github.event.issue.user.email }}"
+                },
+                "summary": "${{ steps.convert_title.outputs.converted_title }}",
+                "description": {
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "${{ steps.md2jira.outputs.output-text }}",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "doc",
+                  "version": 1
+                }
               }
             }
+
 
       - name: Jira 이슈 키 추출
         id: extract_issue_key
