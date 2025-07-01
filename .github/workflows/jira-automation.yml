@@ -98,4 +98,4 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           body: |            
             🪾 **생성된 브랜치**: `feat/${{ steps.extract_issue_key.outputs.issue_key }}`
-            🔗 **연결된 Jira Task**: ${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_issue_key.outputs.issue_key }}
+            🔗 **연결된 Jira Task**: <a href="${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_issue_key.outputs.issue_key }}" target="_blank">${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_issue_key.outputs.issue_key }}</a>
