@@ -72,6 +72,11 @@ jobs:
             }
 
 
+      - name: Jira 응답 디버깅
+        run: |
+          echo "HTTP Status: ${{ steps.create_jira_task.outputs.status }}"
+          echo "Full Response: ${{ steps.create_jira_task.outputs.response }}"
+          
       - name: Jira 이슈 키 추출
         id: extract_issue_key
         run: |
