@@ -60,7 +60,21 @@ jobs:
                   "name": "Task"
                 },
                 "summary": "${{ steps.convert_title.outputs.converted_title }}",
-                "description": ${{ steps.escape_description.outputs.escaped_description }}
+                "description": {
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": ${{ steps.escape_description.outputs.escaped_description }},
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "doc",
+                  "version": 1
+                }
               }
             }
 
