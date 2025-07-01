@@ -33,60 +33,19 @@ jobs:
           converted_title=$(echo "$title" | sed 's/\[\([^]]*\)\]/[BE\/\1]/')
           echo "converted_title=$converted_title" >> $GITHUB_OUTPUT
 
-      - name: ADF 형식으로 description 생성
-        id: create_adf_description
+      - name: Jira description JSON 이스케이프
+        id: escape_description
         run: |
-          cat > adf_description.json << 'EOF'
-          {
-            "content": [
-              {
-                "type": "heading",
-                "attrs": {"level": 3},
-                "content": [{"type": "text", "text": "Github Issue Link"}]
-              },
-              {
-                "type": "bulletList",
-                "content": [
-                  {
-                    "type": "listItem",
-                    "content": [
-                      {
-                        "type": "paragraph",
-                        "content": [
-                          {
-                            "type": "text",
-                            "text": "${{ github.event.issue.html_url }}",
-                            "marks": [{"type": "link", "attrs": {"href": "${{ github.event.issue.html_url }}"}}]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "heading",
-                "attrs": {"level": 3},
-                "content": [{"type": "text", "text": "📝 이슈 상세 내용"}]
-              },
-              {
-                "type": "paragraph",
-                "content": [{"type": "text", "text": "${{ github.event.issue.body }}"}]
-              }
-            ],
-            "type": "doc",
-            "version": 1
-          }
-          EOF
-          adf_content=$(cat adf_description.json | jq -c .)
-          echo "adf_content=$adf_content" >> $GITHUB_OUTPUT
+          description='${{ steps.md2jira.outputs.output-text }}'
+          escaped_description=$(echo "$description" | jq -R -s .)
+          echo "escaped_description=$escaped_description" >> $GITHUB_OUTPUT
 
       # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post
       - name: Jira Task 생성
         id: create_jira_task
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue'
+          url: '${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue'
           method: 'POST'
           username: '${{ secrets.JIRA_USER_EMAIL }}'
           password: '${{ secrets.JIRA_API_TOKEN }}'
@@ -101,7 +60,7 @@ jobs:
                   "name": "Task"
                 },
                 "summary": "${{ steps.convert_title.outputs.converted_title }}",
-                "description": ${{ steps.create_adf_description.outputs.adf_content }}
+                "description": "${{ steps.md2jira.outputs.output-text }}"
               }
             }
 
