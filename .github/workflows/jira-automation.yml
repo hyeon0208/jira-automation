@@ -33,14 +33,14 @@ jobs:
           converted_title=$(echo "$title" | sed 's/\[\([^]]*\)\]/[BE\/\1]/')
           echo "converted_title=$converted_title" >> $GITHUB_OUTPUT
 
-      - name: Jira description JSON 이스케이프
+      - name: Jira description JSON을 문자열로 이스케이프 처리
         id: escape_description
         run: |
           description='${{ steps.md2jira.outputs.output-text }}'
           escaped_description=$(echo "$description" | jq -R -s .)
           echo "escaped_description=$escaped_description" >> $GITHUB_OUTPUT
 
-      # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post
+      # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-post
       - name: Jira Task 생성
         id: create_jira_task
         uses: fjogeleit/http-request-action@v1
@@ -60,7 +60,7 @@ jobs:
                   "name": "Task"
                 },
                 "summary": "${{ steps.convert_title.outputs.converted_title }}",
-                "description": "${{ steps.md2jira.outputs.output-text }}"
+                "description": ${{ steps.escape_description.outputs.escaped_description }}
               }
             }
 
