@@ -36,9 +36,11 @@ jobs:
       - name: Jira description JSON을 문자열로 이스케이프 처리
         id: escape_description
         run: |
-          description='${{ steps.md2jira.outputs.output-text }}'
-          escaped_description=$(echo "$description" | jq -R -s .)
-          echo "escaped_description=$escaped_description" >> $GITHUB_OUTPUT
+          {
+            echo "escaped_description<<EOF"
+            echo '${{ steps.md2jira.outputs.output-text }}' | jq -R -s .
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       # ref : https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-post
       - name: Jira Task 생성
@@ -96,6 +98,6 @@ jobs:
           actions: 'create-comment'
           token: ${{ secrets.GIT_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          body: |            
+          body: |
             🪾 **생성된 브랜치**: `feat/${{ steps.extract_issue_key.outputs.issue_key }}`
             🔗 **연결된 Jira Task**: <a href="${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_issue_key.outputs.issue_key }}" target="_blank">${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_issue_key.outputs.issue_key }}</a>
