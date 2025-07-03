@@ -112,4 +112,7 @@ jobs:
           body: |
             🪾 **생성된 브랜치**: `${{ steps.extract_issue_type.outputs.issue_type }}/${{ steps.extract_jira_task_key.outputs.task_key }}`
             🔗 **연결된 Jira Task**: <a href="${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_jira_task_key.outputs.task_key }}" target="_blank">${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.extract_jira_task_key.outputs.task_key }}</a>
-            ⌨️ **이슈 작업 간단 명령어**: git checkout dev && git pull && git checkout -b ${{ steps.extract_issue_type.outputs.issue_type }}/${{ steps.extract_jira_task_key.outputs.task_key }} origin/${{ steps.extract_issue_type.outputs.issue_type }}/${{ steps.extract_jira_task_key.outputs.task_key }}
+            ⌨️ **이슈 작업 간단 명령어**:
+            ```
+            git checkout dev && git pull && git checkout -b ${{ steps.extract_issue_type.outputs.issue_type }}/${{ steps.extract_jira_task_key.outputs.task_key }} origin/${{ steps.extract_issue_type.outputs.issue_type }}/${{ steps.extract_jira_task_key.outputs.task_key }}
+            ```
